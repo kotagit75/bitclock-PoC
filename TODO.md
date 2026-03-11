@@ -1,2 +1,0 @@
-# wallet.tsのcheckProofStampsのisValidStampCountsを実装していないので，実装する.
-これ,stampsのカウントがProofSetにおける同じアドレスの最新のカウントより大きいことを確認し，true,falseで判定する。
