@@ -3,12 +3,12 @@
   "compilerOptions": {
     // File Layout
     "rootDir": "src",
-    "outDir": "lib",
+    "outDir": "dist",
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
     "module": "esnext",
-    "target": "es6",
+    "target": "es2024",
     "types": [],
     "lib": ["ESNext", "dom"],
     // For nodejs:
