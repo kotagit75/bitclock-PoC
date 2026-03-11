@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { createStamp, updateProofPool } from "./proof/wallet";
+import { createStamp, updateProofPool } from "./proof/node";
 import { Stamp, type Proof } from "./proof/proof";
 import type { URL } from "url";
 import { logger } from "./logger";
@@ -8,9 +8,11 @@ import { exportMessage, exportProofPool, exportStamp, importMessage, importProof
 
 var peers: Set<URL>
 
-type MessageType = "NONE" | "REQUEST_STAMP" | "UPDATE_PROOFPOOL"
+const stampPool:  Map<string, Stamp[]> = new Map()
+
+type MessageType = "NONE" | "REQUEST_STAMP" | "RESPONCE_STAMP" | "UPDATE_PROOFPOOL"
 export class Message{
-    constructor(public type: MessageType, public data: string){}
+    constructor(public type: MessageType, public data: string, public data2: string){}
 }
 const initP2PServer = () => {
     const app = express()
@@ -23,7 +25,7 @@ const initP2PServer = () => {
     app.get("/", (req, res) => {
         res.send("Hello P2P!")
     })
-    app.get("/message", (req, res) => {
+    app.post("/message", (req, res) => {
         var message: Message|undefined = importMessage(req.body)
         if(!message){
             res.send("cannot parse request data as message")
@@ -34,8 +36,29 @@ const initP2PServer = () => {
             case "NONE":
                 break
             case "REQUEST_STAMP":
-                var pk = message.data
-                res.send(exportStamp(createStamp(pk)))
+                const pk = message.data
+                if(!pk) {
+                    break
+                }
+                (async () => createStamp(pk))().then((stamp: Stamp|undefined) => {
+                    if(!stamp){
+                        return
+                    }
+                    broadcastResponceStamp(pk, exportStamp(stamp))
+                })
+                break
+            case "RESPONCE_STAMP":
+                const pk_ = message.data
+                var stamp = importStamp(message.data2)
+                if(!stamp) {
+                    break
+                }
+                const stamps = stampPool.get(pk_)
+                if(!stamps){
+                    stampPool.set(pk_, [stamp])
+                }else{
+                    stampPool.set(pk_, stamps.concat(stamp))
+                }
                 break
             case "UPDATE_PROOFPOOL":
                 var newProofPool = importProofPool(message.data)
@@ -55,30 +78,46 @@ const initP2PServer = () => {
 
 const write = async (peer: URL, message: Message): Promise<string> => {
     const responce = await fetch(peer, {
-        method: 'GET',
+        method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: exportMessage(message)
+        body: JSON.stringify(exportMessage(message))
     })
     return responce.text()
 }
 const broadcast = async (message: Message): Promise<string[]> => {
     var responces:string[]  = []
-    await peers.forEach(async (peer, _, __) => responces.push(await write(peer, message)))
+    peers.forEach(async (peer, _, __) => responces.push(await write(peer, message)))
     return responces
 }
-const broadcastRequestStamps = async (pk: string): Promise<Stamp[]> => {
-    var responces = await broadcast(new Message("REQUEST_STAMP", pk))
-    var stamps = responces.map((res, _, __) => importStamp(res)).filter((item) => item !== undefined)
-    return stamps
+const broadcastRequestStamps = async (pk: string): Promise<void> => {
+    await broadcast(new Message("REQUEST_STAMP", pk, ""))
+}
+const needNumberOfStamps = 0
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+const broadcastAndGetRequestStamps = async (pk: string): Promise<Stamp[]> => {
+    await broadcastRequestStamps(pk)
+    var resStamps: Stamp[]|undefined = stampPool.get(pk)
+    const stampsLen = () => resStamps?resStamps.length:0
+    while (stampsLen() < needNumberOfStamps) {
+        await sleep(100);
+        resStamps = stampPool.get(pk)
+    }
+    if(!resStamps){
+        return []
+    }
+    return resStamps
+}
+const broadcastResponceStamp = async (pk: string, stamp: Stamp): Promise<void> => {
+    await broadcast(new Message("RESPONCE_STAMP", pk, JSON.stringify(exportStamp(stamp))))
 }
 const broadcastUpdateProofPool = async (proofPool: Set<Proof>): Promise<void> => {
-    await broadcast(new Message("REQUEST_STAMP", exportProofPool(proofPool)))
+    await broadcast(new Message("UPDATE_PROOFPOOL", JSON.stringify(exportProofPool(proofPool)), ""))
 }
 
 const addPeer = (newPeer: URL) => {
     peers.add(newPeer)
 }
 
-export { initP2PServer, peers, broadcastRequestStamps, broadcastUpdateProofPool, addPeer }
+export { initP2PServer, peers, broadcastRequestStamps, broadcastAndGetRequestStamps, broadcastUpdateProofPool, addPeer }
