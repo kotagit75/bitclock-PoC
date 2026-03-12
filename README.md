@@ -23,24 +23,20 @@ npm install
 ```
 
 ## Usage
-**run**
 ```bash
+# run
 npm start
-```
-**proof**
-```bash
+
+# proof
 curl -X POST -H "Content-Type: application/json" -d '{"data":"Some data"}' localhost:8080/proof
-```
-**get pool**
-```bash
+
+# get pool
 curl http://localhost:8080/getPool
-```
-**get address**
-```bash
+
+# get address
 curl http://localhost:8080/address
-```
-**get status**
-```bash
+
+# get status
 curl http://localhost:8080/status
 ```
 
