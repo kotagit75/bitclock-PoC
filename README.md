@@ -4,19 +4,24 @@
 </div>
 
 Bit:Clock is a ledger-free distributed timestamp system.
+
+[![License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
+
 > [!NOTE]
 > Bit:Clock is currently in active development.
+
 ## Set up
-### 1. install
-```
+```bash
+# Clone the repository (or Download ZIP)
 git clone https://github.com/kotagit75/Bit-Clock.git
-```
-or
-Download ZIP
-### 2. install packages
-```
+
+# Navigate to the project directory
+cd Bit-Clock
+
+# Install packages
 npm install
 ```
+
 ## Usage
 **run**
 ```bash
@@ -38,5 +43,6 @@ curl http://localhost:8080/address
 ```bash
 curl http://localhost:8080/status
 ```
+
 ## License
-MIT License
+[Bit:Clock is under the MIT License.](LICENSE)
