@@ -73,13 +73,16 @@ const getLastestCountOfAddress = (address: Address): number => {
     }
     return lastestStamp.count
 }
+const minValidStampRate = 0.8
 const checkProofStamps = async (proof: Proof): Promise<boolean> => {
     var key = new NodeRSA({ b: 512 })
     var addressesForCheck = (await fetchStamps(keyToPk(key))).map((stamp, _, __) => stamp.address)
     var addressesOfProof = proof.stamps.map((stamp, _, __) => stamp.address)
-    const isValidStampAddresses = addressesOfProof.every((address, _, __) => addressesForCheck.includes(address))
+    const numberOfIncludedAddresses = addressesOfProof.map((address, _, __) => addressesForCheck.includes(address)).filter(Boolean).length
+    const stampRate = numberOfIncludedAddresses/addressesOfProof.length
+    const isValidStampAddressesRate = stampRate >= minValidStampRate
     const isValidStampCounts = proof.stamps.every((stamp, _, __) => getLastestCountOfAddress(stamp.address) < stamp.count)
-    return isValidStampAddresses && isValidStampCounts
+    return isValidStampAddressesRate && isValidStampCounts
 }
 const addProof = async (proof: Proof): Promise<boolean> => {
     if (isValidProof(proof) && await checkProofStamps(proof)){
@@ -90,7 +93,9 @@ const addProof = async (proof: Proof): Promise<boolean> => {
 }
 const updateProofPool = async (newProofPool: Set<Proof>) => {
     var isProofAddedToSet: boolean[] = []
-    await newProofPool.forEach(async (proof, _, __) => isProofAddedToSet.push(await addProof(proof)))
+    for (const proof of newProofPool) {
+        isProofAddedToSet.push(await addProof(proof))
+    }
     if (isProofAddedToSet.includes(true) || proofPool.difference(newProofPool).size > 0) {
         broadcastUpdateProofPool(proofPool)
     }
