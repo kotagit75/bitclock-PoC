@@ -11,7 +11,7 @@ Bit:Clock is a ledger-free distributed timestamp system.
 > Bit:Clock is currently in active development.
 
 ## Documents
-[About the algorithm](docs/algorithm.md)
+[About the algorithm (Not finished yet)](docs/algorithm.md)
 ## :rocket: Set up
 ```bash
 # Clone the repository (or Download ZIP)
