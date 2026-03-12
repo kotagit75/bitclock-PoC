@@ -13,9 +13,13 @@ var address: Address
 var counter: Counter
 var proofPool: Set<Proof> = new Set([])
 
+const nodeDirPath: string = 'node'
 const nodeKeyPath: string = 'node/key'
 
 const initNode = () => {
+    if (!fs.existsSync(nodeDirPath)) {
+        fs.mkdirSync(nodeDirPath, { recursive: true });
+    }
     if(!fs.existsSync(nodeKeyPath)){
         generateNodeKey()
     }else{
