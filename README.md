@@ -10,7 +10,9 @@ Bit:Clock is a ledger-free distributed timestamp system.
 > [!NOTE]
 > Bit:Clock is currently in active development.
 
-## Set up :rocket:
+## Documents
+[About the algorithm](docs/algorithm.md)
+## :rocket: Set up
 ```bash
 # Clone the repository (or Download ZIP)
 git clone https://github.com/kotagit75/Bit-Clock.git
@@ -22,7 +24,7 @@ cd Bit-Clock
 npm install
 ```
 
-## Usage
+## :gear: Usage
 ```bash
 # run
 npm start
