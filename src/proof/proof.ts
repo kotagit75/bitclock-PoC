@@ -6,23 +6,23 @@ export type Address = string
 export type Signature = number[]
 
 class Stamp{
-    constructor(public address: Address, public count: number, public vdfResult: VDFProof, public sign: Signature){}
-    toStringForSign(pk: string): string{
-        return stampToStringForSign(pk, this.address, this.count, this.vdfResult)
+    constructor(public address: Address, public count: number, public pk: string, public vdfResult: VDFProof, public sign: Signature){}
+    toStringForSign(): string{
+        return stampToStringForSign(this.pk, this.address, this.count, this.vdfResult)
     }
 }
 const stampToStringForSign = (pk: string, address: Address, count: number, vdfResult: VDFProof): string => pk + address + String(count) + String(vdfResult)
-const calcStampHashForVDF = (address: Address, count: number): bigint => BigInt("0x"+createHash("sha256").update(address + String(count)).digest('hex'))
+const calcStampHashForVDF = (address: Address, count: number, pk: string): bigint => BigInt("0x"+createHash("sha256").update(address + String(count) + pk).digest('hex'))
 const N = 9999999967n * 9999999973n
 const T = 100000
-const calcVDFResult = (address: Address, count: number): VDFProof => {
-    const hash = calcStampHashForVDF(address, count)
+const calcVDFResult = (address: Address, count: number, pk: string): VDFProof => {
+    const hash = calcStampHashForVDF(address, count, pk)
     return createVDFProof(hash, computeVDF(hash, T, N), T, N)
 }
 const isValidStamp = (stamp: Stamp, pk: string): boolean => {
     const isValidCount = stamp.count>=0
-    const isValidVDF = verifyVDF(calcStampHashForVDF(stamp.address, stamp.count), stamp.vdfResult, T, N)
-    const isValidSign = pkToKey(stamp.address).verify(stamp.toStringForSign(pk), Buffer.from(stamp.sign))
+    const isValidVDF = verifyVDF(calcStampHashForVDF(stamp.address, stamp.count, stamp.pk), stamp.vdfResult, T, N)
+    const isValidSign = pkToKey(stamp.address).verify(stamp.toStringForSign(), Buffer.from(stamp.sign))
     return isValidCount && isValidVDF && isValidSign
 }
 class Proof{

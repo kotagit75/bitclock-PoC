@@ -43,9 +43,9 @@ const getProofPool = (): Set<Proof> => proofPool
 const createSign = (data: string): Signature => Array.from(nodeKey.sign(data))
 const createStamp = (pk: string): Stamp => {
     const count = counter.increment()
-    const vdfResult = calcVDFResult(getAddress(), count)
+    const vdfResult = calcVDFResult(getAddress(), count, pk)
     const sign = createSign(stampToStringForSign(pk, getAddress(), count, vdfResult))
-    return new Stamp(getAddress(), count, vdfResult, sign)
+    return new Stamp(getAddress(), count, pk, vdfResult, sign)
 }
 const fetchStamps = async (pk: string): Promise<Stamp[]> => {
     var myStamp = createStamp(pk)
@@ -60,7 +60,7 @@ const createProof = async (data: string): Promise<Proof> => {
     return new Proof(data, stamps, sk, getAddress(), createSign(stringforSign))
 }
 const getLastestStampOfAddress = (address: Address): Stamp|undefined => {
-    var lastestStamp = Array.from(proofPool).flatMap((proof, _, __) => proof.stamps).filter((stamp, _, __) => stamp.address == address).reduce((a,b)=>a.count>b.count?a:b, new Stamp("", -1, initVDFResult, []))
+    var lastestStamp = Array.from(proofPool).flatMap((proof, _, __) => proof.stamps).filter((stamp, _, __) => stamp.address == address).reduce((a,b)=>a.count>b.count?a:b, new Stamp("", -1, "", initVDFResult, []))
     if(lastestStamp.count < 0) {
         return undefined
     }
