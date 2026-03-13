@@ -5,7 +5,8 @@ A node has the following four states:
 - RSA key
 - address (public key)
 - counter
-- proof pool  
+- proof pool
+
 This system handles the following two types of structures:
 - stamp
 - proof
