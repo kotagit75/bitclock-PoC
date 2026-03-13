@@ -1,29 +1,33 @@
-import { createHash } from "crypto"
-import { keyToPk, pkToKey, skToKey } from "./util"
-import { computeVDF, createVDFProof, verifyVDF, type VDFProof } from "./vdf"
+import { hashSHA256, keyToPk, pkToKey, skToKey } from "./util"
 
 export type Address = string
 export type Signature = number[]
 
 class Stamp{
-    constructor(public address: Address, public count: number, public pk: string, public vdfResult: VDFProof, public sign: Signature){}
+    constructor(public address: Address, public count: number, public pk: string, public nonce: number, public sign: Signature){}
     toStringForSign(): string{
-        return stampToStringForSign(this.pk, this.address, this.count, this.vdfResult)
+        return stampToStringForSign(this.pk, this.address, this.count, this.nonce)
     }
 }
-const stampToStringForSign = (pk: string, address: Address, count: number, vdfResult: VDFProof): string => pk + address + String(count) + String(vdfResult)
-const calcStampHashForVDF = (address: Address, count: number, pk: string): bigint => BigInt("0x"+createHash("sha256").update(address + String(count) + pk).digest('hex'))
-const N = 9999999967n * 9999999973n
-const T = 100000
-const calcVDFResult = (address: Address, count: number, pk: string): VDFProof => {
-    const hash = calcStampHashForVDF(address, count, pk)
-    return createVDFProof(hash, computeVDF(hash, T, N), T, N)
+const stampToStringForSign = (pk: string, address: Address, count: number, nonce: number): string => pk + address + String(count) + String(nonce)
+
+const baseCost = 6
+const Cost = baseCost
+const verifyNonce = (address: Address, count: number, pk: string, nonce: number, cost: number): boolean=>hashSHA256(address + String(count) + pk + String(nonce)).startsWith("0".repeat(cost))
+const calcNonce = (address: Address, count: number, pk: string): number => {
+    const cost = Cost
+    var nonce = 0
+    while(!verifyNonce(address, count, pk, nonce, cost)){
+        nonce++
+    }
+    return nonce
 }
 const isValidStamp = (stamp: Stamp, pk: string): boolean => {
     const isValidCount = stamp.count>=0
-    const isValidVDF = verifyVDF(calcStampHashForVDF(stamp.address, stamp.count, stamp.pk), stamp.vdfResult, T, N)
+    const cost = Cost
+    const isValidNonce = verifyNonce(stamp.address, stamp.count, pk, stamp.nonce, cost)
     const isValidSign = pkToKey(stamp.address).verify(stamp.toStringForSign(), Buffer.from(stamp.sign))
-    return isValidCount && isValidVDF && isValidSign
+    return isValidCount && isValidNonce && isValidSign
 }
 class Proof{
     constructor(public data: string, public stamps: Stamp[], public sk: string, public address: Address, public sign: Signature){}
@@ -32,7 +36,7 @@ class Proof{
     }
 }
 const proofToStringForSign = (data: string, stamps: Stamp[], sk: string, address: Address): string => data+stamps.toString()+sk+address
-const MAX_NUMBER_OF_STAMPS = 10
+const MAX_NUMBER_OF_STAMPS = 1
 const isValidProof = (proof: Proof): boolean => {
     var proof_pk = keyToPk(skToKey(proof.sk))
     const isValidStamps = proof.stamps.every((stamp, _ ,__) => isValidStamp(stamp, proof_pk))
@@ -66,4 +70,4 @@ const newProofSet = (proofs: Proof[]|undefined): Set<Proof> => {
     return new Set(proofs)
 }
 
-export { Stamp, isValidStamp, calcVDFResult, stampToStringForSign, Proof, proofToStringForSign, MAX_NUMBER_OF_STAMPS, isValidProof, newProofSet, compareTime }
+export { Stamp, isValidStamp, calcNonce, stampToStringForSign, Proof, proofToStringForSign, MAX_NUMBER_OF_STAMPS, isValidProof, newProofSet, compareTime }

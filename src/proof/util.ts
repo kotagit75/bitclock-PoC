@@ -1,3 +1,4 @@
+import { createHash } from "crypto";
 import NodeRSA from "node-rsa";
 
 const toHexString = (buf: Buffer): string => {
@@ -24,4 +25,7 @@ function keyToSk(key: NodeRSA): string {
     return toHexString(key.exportKey("pkcs1-private-der"))
 }
 
-export { toHexString, toBuffer, pkToKey, skToKey, keyToPk, keyToSk }
+const hashSHA256 = (data: string): string => createHash("sha256").update(data).digest('hex')
+const hashSHA256ToNumber = (data: string): number => Number("0x"+createHash("sha256").update(data).digest('hex'))
+
+export { toHexString, toBuffer, pkToKey, skToKey, keyToPk, keyToSk, hashSHA256, hashSHA256ToNumber }

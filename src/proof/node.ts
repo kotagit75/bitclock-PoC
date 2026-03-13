@@ -2,11 +2,10 @@ import NodeRSA from "node-rsa";
 import fs from "fs";
 
 import { keyToPk, keyToSk, skToKey } from "./util";
-import { calcVDFResult, isValidProof, Proof, proofToStringForSign, Stamp, stampToStringForSign, type Address, type Signature } from "./proof";
+import { calcNonce, isValidProof, Proof, proofToStringForSign, Stamp, stampToStringForSign, type Address, type Signature } from "./proof";
 import { Counter } from "./counter";
-import { broadcastAndGetRequestStamps, broadcastRequestStamps, broadcastUpdateProofPool } from "../p2p";
+import { broadcastAndGetRequestStamps, broadcastUpdateProofPool } from "../p2p";
 import { logger } from "@/logger";
-import { initVDFResult } from "./vdf";
 
 var nodeKey: NodeRSA
 var address: Address
@@ -26,7 +25,14 @@ const initNode = () => {
         readNodeKey()
     }
     address = keyToPk(nodeKey)
-    counter = new Counter(0)
+    
+    counter = new Counter((() => {
+        const lastestCount = getLastestCountOfMine()
+        if(lastestCount < 0) {
+            return 0
+        }
+        return lastestCount
+    })())
 }
 const generateNodeKey = () => {
     nodeKey = new NodeRSA({ b: 512 })
@@ -43,9 +49,9 @@ const getProofPool = (): Set<Proof> => proofPool
 const createSign = (data: string): Signature => Array.from(nodeKey.sign(data))
 const createStamp = (pk: string): Stamp => {
     const count = counter.increment()
-    const vdfResult = calcVDFResult(getAddress(), count, pk)
-    const sign = createSign(stampToStringForSign(pk, getAddress(), count, vdfResult))
-    return new Stamp(getAddress(), count, pk, vdfResult, sign)
+    const nonce = calcNonce(getAddress(), count, pk)
+    const sign = createSign(stampToStringForSign(pk, getAddress(), count, nonce))
+    return new Stamp(getAddress(), count, pk, nonce, sign)
 }
 const fetchStamps = async (pk: string): Promise<Stamp[]> => {
     var myStamp = createStamp(pk)
@@ -60,7 +66,7 @@ const createProof = async (data: string): Promise<Proof> => {
     return new Proof(data, stamps, sk, getAddress(), createSign(stringforSign))
 }
 const getLastestStampOfAddress = (address: Address): Stamp|undefined => {
-    var lastestStamp = Array.from(proofPool).flatMap((proof, _, __) => proof.stamps).filter((stamp, _, __) => stamp.address == address).reduce((a,b)=>a.count>b.count?a:b, new Stamp("", -1, "", initVDFResult, []))
+    var lastestStamp = Array.from(proofPool).flatMap((proof, _, __) => proof.stamps).filter((stamp, _, __) => stamp.address == address).reduce((a,b)=>a.count>b.count?a:b, new Stamp("", -1, "", 0, []))
     if(lastestStamp.count < 0) {
         return undefined
     }
@@ -73,6 +79,8 @@ const getLastestCountOfAddress = (address: Address): number => {
     }
     return lastestStamp.count
 }
+const getLastestCountOfMine = ():number => getLastestCountOfAddress(getAddress())
+
 const minValidStampRate = 0.8
 const checkProofStamps = async (proof: Proof): Promise<boolean> => {
     var key = new NodeRSA({ b: 512 })
