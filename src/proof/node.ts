@@ -49,7 +49,7 @@ const createStamp = (pk: string, difficulty: number): Stamp => {
 }
 const fetchStamps = async (pk: string, difficulty: number): Promise<Stamp[]> => {
     var myStamp = createStamp(pk, difficulty)
-    var peerStamps = await broadcastAndGetRequestStamps(pk)
+    var peerStamps = await broadcastAndGetRequestStamps(pk, difficulty)
     return peerStamps.concat(myStamp)
 }
 const createProof = async (data: string): Promise<Proof> => {

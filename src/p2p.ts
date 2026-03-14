@@ -37,10 +37,11 @@ const initP2PServer = () => {
                 break
             case "REQUEST_STAMP":
                 const pk = message.data
-                if(!pk) {
+                const difficulty: number = Number(message.data2)
+                if(!pk || !difficulty) {
                     break
                 }
-                (async () => createStamp(pk))().then((stamp: Stamp|undefined) => {
+                (async () => createStamp(pk, difficulty))().then((stamp: Stamp|undefined) => {
                     if(!stamp){
                         return
                     }
@@ -91,13 +92,13 @@ const broadcast = async (message: Message): Promise<string[]> => {
     peers.forEach(async (peer, _, __) => responces.push(await write(peer, message)))
     return responces
 }
-const broadcastRequestStamps = async (pk: string): Promise<void> => {
-    await broadcast(new Message("REQUEST_STAMP", pk, ""))
+const broadcastRequestStamps = async (pk: string, difficulty: number): Promise<void> => {
+    await broadcast(new Message("REQUEST_STAMP", pk, String(difficulty)))
 }
 const needNumberOfStamps = MAX_NUMBER_OF_STAMPS - 1
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
-const broadcastAndGetRequestStamps = async (pk: string): Promise<Stamp[]> => {
-    await broadcastRequestStamps(pk)
+const broadcastAndGetRequestStamps = async (pk: string, difficulty: number): Promise<Stamp[]> => {
+    await broadcastRequestStamps(pk, difficulty)
     var resStamps: Stamp[]|undefined = stampPool.get(pk)
     const stampsLen = () => resStamps?resStamps.length:0
     while (stampsLen() < needNumberOfStamps) {
