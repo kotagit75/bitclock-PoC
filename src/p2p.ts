@@ -104,7 +104,7 @@ const broadcastAndGetRequestStamps = async (pk: string, difficulty: number): Pro
     var resStamps: Stamp[]|undefined = stampPool.get(pk)
     const stampsLen = () => resStamps?resStamps.length:0
     const sleepTime = 100
-    const timeout = 100
+    const timeout = sleepTime*1000
     var waitTime = 0
     while (stampsLen() < needNumberOfStamps) {
         await sleep(sleepTime);
