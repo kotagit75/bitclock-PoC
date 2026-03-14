@@ -111,28 +111,7 @@ const updateProofPool = async (newProofPool: Set<Proof>) => {
     }
 }
 
-// const targetCountIncrease = 10
-// const baseDifficulty = 4
-// const calcDifficulty = (): number => {
-//     if(proofPool.size < 2){
-//         return baseDifficulty
-//     }
-//     const diff = sortProofPool().map((p, _, __)=>p.).map((v, i, a) => {
-//         const left = a[i - 1] ?? v;
-//         const right = a[i + 1] ?? v;
-//         return Math.abs(v - left) + Math.abs(v - right);
-//     })
-//     return Math.floor(diff.reduce((difficulty, actualTime, __) => {
-//         const rate = targetTime/actualTime
-//         if(rate > 1.2){
-//             return 1.2*difficulty
-//         }else if(0.8 < rate){
-//             return 0.8*difficulty
-//         }else {
-//             return rate*difficulty
-//         }
-//     }, baseDifficulty))
-// }
+// Difficulty should be bigger.
 const calcDifficulty = (): number =>{
     const base = 5
     return base
