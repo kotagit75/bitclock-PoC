@@ -18,6 +18,7 @@ const init = () => {
         apiServer.close(()=>{
             logger.info("SYS", "API server was closed")
         })
+        process.exit(0)
     })
 }
 init()

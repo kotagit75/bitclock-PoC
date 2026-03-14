@@ -47,23 +47,21 @@ export const initAPIServer = () => {
         }
     })
     // curl -X POST -H "Content-Type: application/json" -d '{"data":"Hello world!"}' localhost:8080/proof
-    app.post("/proof", (req, res) => {
+    app.post("/proof", async (req, res) => {
         res.setHeader("Content-Type", "application/json")
         var data = req.body.data
         if (data != undefined){
             res.send({"result": "Creating proof"});
             logger.info("API", "Creating proof. Source:", JSON.stringify(req.body));
-            (async () => {
-                var proof = await createProof(data)
-                var result = await addProof(proof)
-                if (result){
-                    logger.info("API", "Creating proof was successful.")
-                    broadcastUpdateProofPool(getProofPool())
-                }
-                else{
-                    logger.error("API", "Creating proof was failed. Source:", JSON.stringify(req.body))
-                }
-            })()
+            var proof = await createProof(data)
+            var result = await addProof(proof)
+            if (result){
+                logger.info("API", "Creating proof was successful.")
+                broadcastUpdateProofPool(getProofPool())
+            }
+            else{
+                logger.error("API", "Creating proof was failed. Source:", JSON.stringify(req.body))
+            }
         }else{
             res.send({"result": "faild: data is undefined"})
         }
