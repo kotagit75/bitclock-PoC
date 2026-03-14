@@ -1,11 +1,13 @@
 import NodeRSA from "node-rsa";
 import fs from "fs";
 
-import { keyToPk, keyToSk, median, skToKey } from "./util";
-import { calcNonce, compareTime, isValidProof, Proof, proofToStringForSign, Stamp, stampToStringForSign, type Address, type Signature } from "./proof";
+import { keyToPk, keyToSk, skToKey } from "./util";
+import { calcNonce, compareTime, isValidProof, Proof, PROOF_KEY_SIZE, proofToStringForSign, Stamp, stampToStringForSign, type Address, type Signature } from "./proof";
 import { Counter } from "./counter";
 import { broadcastAndGetRequestStamps, broadcastUpdateProofPool } from "../p2p";
 import { logger } from "@/logger";
+
+const NODE_KEY_SIZE = 2048
 
 var nodeKey: NodeRSA
 var address: Address
@@ -29,7 +31,7 @@ const initNode = () => {
     counter = new Counter(getLastestCountOfMine())
 }
 const generateNodeKey = () => {
-    nodeKey = new NodeRSA({ b: 512 })
+    nodeKey = new NodeRSA({ b: NODE_KEY_SIZE })
     fs.writeFileSync(nodeKeyPath, keyToSk(nodeKey))
     logger.info("NODE", "Generated node key")
 }
@@ -53,7 +55,7 @@ const fetchStamps = async (pk: string, difficulty: number): Promise<Stamp[]> => 
     return peerStamps.concat(myStamp)
 }
 const createProof = async (data: string): Promise<Proof> => {
-    var proofKey = new NodeRSA({ b: 512 })
+    var proofKey = new NodeRSA({ b: PROOF_KEY_SIZE })
     const difficulty = calcDifficulty()
     logger.info("NODE", "Creating proof. difficulty:", difficulty)
     var stamps = await fetchStamps(keyToPk(proofKey), difficulty)
@@ -81,7 +83,7 @@ const getLastestCountOfMine = ():number => getLastestCountOfAddress(getAddress()
 
 const minValidStampRate = 0.8
 const checkProofStamps = async (proof: Proof): Promise<boolean> => {
-    const key = new NodeRSA({ b: 512 })
+    const key = new NodeRSA({ b: PROOF_KEY_SIZE })
     const addressesForCheck = (await fetchStamps(keyToPk(key), calcDifficulty())).map((stamp, _, __) => stamp.address)
     const addressesOfProof = proof.stamps.map((stamp, _, __) => stamp.address)
     const numberOfIncludedAddresses = addressesOfProof.map((address, _, __) => addressesForCheck.includes(address)).filter(Boolean).length

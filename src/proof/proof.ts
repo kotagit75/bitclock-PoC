@@ -37,6 +37,7 @@ class Proof{
         return median(this.stamps.map((s,_,__)=>s.count))
     }
 }
+const PROOF_KEY_SIZE = 2048
 const proofToStringForSign = (data: string, stamps: Stamp[], sk: string, address: Address): string => data+stamps.toString()+sk+address
 const MAX_NUMBER_OF_STAMPS = 1
 const isValidProof = (proof: Proof): boolean => {
@@ -54,4 +55,4 @@ const newProofSet = (proofs: Proof[]|undefined): Set<Proof> => {
     return new Set(proofs)
 }
 
-export { Stamp, isValidStamp, calcNonce, stampToStringForSign, Proof, proofToStringForSign, MAX_NUMBER_OF_STAMPS, isValidProof, newProofSet, compareTime }
+export { Stamp, isValidStamp, calcNonce, stampToStringForSign, Proof, proofToStringForSign, MAX_NUMBER_OF_STAMPS, PROOF_KEY_SIZE, isValidProof, newProofSet, compareTime }
