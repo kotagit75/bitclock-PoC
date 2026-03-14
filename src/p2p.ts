@@ -90,7 +90,9 @@ const write = async (peer: URL, message: Message): Promise<string> => {
 }
 const broadcast = async (message: Message): Promise<string[]> => {
     var responces:string[]  = []
-    peers.forEach(async (peer, _, __) => responces.push(await write(peer, message)))
+    for(const peer of peers) {
+        responces.push(await write(peer, message))
+    }
     return responces
 }
 const broadcastRequestStamps = async (pk: string, difficulty: number): Promise<void> => {
