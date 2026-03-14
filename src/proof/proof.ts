@@ -1,4 +1,4 @@
-import { hashSHA256, keyToPk, median, pkToKey, skToKey } from "./util"
+import { hashSHA256, keyToPk, median, pkToKey, skToKey } from "@/util"
 
 export type Address = string
 export type Signature = number[]

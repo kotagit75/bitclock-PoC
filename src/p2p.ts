@@ -5,6 +5,7 @@ import { MAX_NUMBER_OF_STAMPS, Stamp, type Proof } from "./proof/proof";
 import type { URL } from "url";
 import { logger } from "./logger";
 import { exportMessage, exportProofPool, exportStamp, importMessage, importProofPool, importStamp } from "./parse";
+import { sleep } from "./util";
 
 var peers: Set<URL>
 
@@ -96,7 +97,6 @@ const broadcastRequestStamps = async (pk: string, difficulty: number): Promise<v
     await broadcast(new Message("REQUEST_STAMP", pk, String(difficulty)))
 }
 const needNumberOfStamps = MAX_NUMBER_OF_STAMPS - 1
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 const broadcastAndGetRequestStamps = async (pk: string, difficulty: number): Promise<Stamp[]> => {
     await broadcastRequestStamps(pk, difficulty)
     var resStamps: Stamp[]|undefined = stampPool.get(pk)

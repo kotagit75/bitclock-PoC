@@ -39,4 +39,6 @@ const median = (numbers: number[]): number => {
 const hashSHA256 = (data: string): string => createHash("sha256").update(data).digest('hex')
 const hashSHA256ToNumber = (data: string): number => Number("0x"+createHash("sha256").update(data).digest('hex'))
 
-export { toHexString, toBuffer, pkToKey, skToKey, keyToPk, keyToSk, median, hashSHA256, hashSHA256ToNumber }
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+
+export { toHexString, toBuffer, pkToKey, skToKey, keyToPk, keyToSk, median, hashSHA256, hashSHA256ToNumber, sleep }
