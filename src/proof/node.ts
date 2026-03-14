@@ -80,16 +80,9 @@ const getLastestCountOfAddress = (address: Address): number => {
 }
 const getLastestCountOfMine = ():number => getLastestCountOfAddress(getAddress())
 
-const minValidStampRate = 0.8
 const checkProofStamps = async (proof: Proof): Promise<boolean> => {
-    const key = new NodeRSA({ b: PROOF_KEY_SIZE })
-    const addressesForCheck = (await fetchStamps(keyToPk(key), calcDifficulty())).map((stamp, _, __) => stamp.address)
-    const addressesOfProof = proof.stamps.map((stamp, _, __) => stamp.address)
-    const numberOfIncludedAddresses = addressesOfProof.map((address, _, __) => addressesForCheck.includes(address)).filter(Boolean).length
-    const stampRate = numberOfIncludedAddresses/addressesOfProof.length
-    const isValidStampAddressesRate = stampRate >= minValidStampRate
     const isValidStampCounts = proof.stamps.every((stamp, _, __) => getLastestCountOfAddress(stamp.address)+1 == stamp.count)
-    return isValidStampAddressesRate && isValidStampCounts
+    return isValidStampCounts
 }
 const addProof = async (proof: Proof): Promise<boolean> => {
     if (isValidProof(proof) && await checkProofStamps(proof)){
