@@ -40,6 +40,7 @@ const initP2PServer = () => {
                 const pk = message.data
                 const difficulty: number = Number(message.data2)
                 if(!pk || !difficulty) {
+                    res.send({"result": "fail"})
                     break
                 }
                 (async () => {
@@ -49,6 +50,7 @@ const initP2PServer = () => {
                     }
                     broadcastResponceStamp(pk, exportStamp(stamp))
                 })()
+                res.send({"result": "creating"})
                 break
             case "RESPONCE_STAMP":
                 const pk_ = message.data
