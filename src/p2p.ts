@@ -23,9 +23,6 @@ const initP2PServer = () => {
     app.use(express.urlencoded({ extended: true }))
 
     peers = new Set()
-    app.get("/status", (req, res) => {
-        res.send("Hello P2P!")
-    })
     app.post("/", (req, res) => {
         var message: Message|undefined = importMessage(JSON.stringify(req.body))
         if(!message){
