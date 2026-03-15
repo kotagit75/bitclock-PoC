@@ -29,17 +29,23 @@ npm install
 # run
 npm start
 
-# proof
-curl -X POST -H "Content-Type: application/json" -d '{"data":"Some data"}' http://localhost:8080/proof
-
-# get pool
-curl http://localhost:8080/getPool
+# get status
+curl http://localhost:8080/status
 
 # get address
 curl http://localhost:8080/address
 
-# get status
-curl http://localhost:8080/status
+# get pool
+curl http://localhost:8080/pool
+
+# get peers
+curl http://localhost:8080/peers
+
+# add peer
+curl -X POST -H "Content-Type: application/json" -d '{"url":"http://[peerIP]:3000/"}' http://localhost:8080/addPeer
+
+# proof
+curl -X POST -H "Content-Type: application/json" -d '{"data":"Some data"}' http://localhost:8080/proof
 ```
 
 ## License
