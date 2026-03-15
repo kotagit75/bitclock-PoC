@@ -46,4 +46,19 @@ const isDuplicated = <T,>(elements: T[]): boolean => {
     return !(elementsToSetObject.size === elements.length);
 }
 
-export { toHexString, toBuffer, pkToKey, skToKey, keyToPk, keyToSk, median, hashSHA256, hashSHA256ToNumber, sleep, isDuplicated }
+type Status = {
+    status: string
+    uptime: number
+    resource: {
+        memory: number
+    }
+}
+const getStatus = (): Status => ({
+    "status": "running",
+    "uptime": process.uptime(),
+    "resource": {
+        "memory": process.memoryUsage().heapUsed,
+    },
+})
+
+export { toHexString, toBuffer, pkToKey, skToKey, keyToPk, keyToSk, median, hashSHA256, hashSHA256ToNumber, sleep, isDuplicated, getStatus }

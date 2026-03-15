@@ -5,6 +5,7 @@ import { addPeer, broadcastUpdateProofPool } from "./p2p";
 import { addProof, createProof, getProofPool, getAddress } from "./proof/node";
 import { logger } from "./logger";
 import { exportProofPool } from "./parse";
+import { getStatus } from "./util";
 
 export const initAPIServer = () => {
     const PORT = 8080
@@ -20,13 +21,7 @@ export const initAPIServer = () => {
     })
 
     app.get("/status", (req, res) => {
-        res.send({
-            "status": "running",
-            "uptime": process.uptime(),
-            "resource": {
-                "memory": process.memoryUsage().heapUsed,
-            },
-        })
+        res.send(getStatus())
     })
     app.get("/address", (req, res) => {
         res.send(getAddress())
