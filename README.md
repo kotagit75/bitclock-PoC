@@ -18,7 +18,7 @@ BitClock is a ledger-free distributed timestamp system. You can issue timestamps
 git clone https://github.com/kotagit75/bitclock.git
 
 # Navigate to the project directory
-cd Bit-Clock
+cd bitclock
 
 # Install packages
 npm install
