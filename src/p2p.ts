@@ -48,7 +48,7 @@ const initP2PServer = () => {
                         return
                     }
                     broadcastResponceStamp(pk, exportStamp(stamp))
-                })
+                })()
                 break
             case "RESPONCE_STAMP":
                 const pk_ = message.data
