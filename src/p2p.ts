@@ -102,10 +102,13 @@ const needNumberOfStamps = MAX_NUMBER_OF_STAMPS - 1
 const broadcastAndGetRequestStamps = async (pk: string, difficulty: number): Promise<Stamp[]> => {
     await broadcastRequestStamps(pk, difficulty)
     var resStamps: Stamp[]|undefined = stampPool.get(pk)
+    
     const stampsLen = () => resStamps?resStamps.length:0
+    
     const sleepTime = 100
     const timeout = sleepTime*1000
     var waitTime = 0
+    
     while (stampsLen() < needNumberOfStamps) {
         await sleep(sleepTime);
         resStamps = stampPool.get(pk)
@@ -130,5 +133,8 @@ const broadcastUpdateProofPool = async (proofPool: Set<Proof>): Promise<void> =>
 const addPeer = (newPeer: URL) => {
     peers.add(newPeer)
 }
+const getPeers = (): URL[] => {
+    return Array.from(peers)
+}
 
-export { initP2PServer, peers, broadcastRequestStamps, broadcastAndGetRequestStamps, broadcastUpdateProofPool, addPeer }
+export { initP2PServer, peers, broadcastRequestStamps, broadcastAndGetRequestStamps, broadcastUpdateProofPool, addPeer, getPeers }
