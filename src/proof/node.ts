@@ -107,7 +107,7 @@ const updateProofPool = async (newProofPool: Set<Proof>) => {
 
 // Difficulty should be bigger.
 const calcDifficulty = (): number =>{
-    const base = 5
+    const base = 3
     return base
 }
 
