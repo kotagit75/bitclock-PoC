@@ -10,18 +10,5 @@ const init = () => {
     initNode()
     const p2pServer = initP2PServer()
     const apiServer = initAPIServer()
-
-    // process.on('SIGINT', ()=>{
-    //     p2pServer.close(()=>{
-    //         logger.info("SYS", "P2P server was closed")
-    //     })
-    //     apiServer.close(()=>{
-    //         logger.info("SYS", "API server was closed")
-    //     })
-    //     process.exit(0)
-    // })
-    // process.on('exit', () => {
-    //     logger.info("SYS", "BitClock is closing")
-    // })
 }
 init()
