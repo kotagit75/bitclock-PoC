@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 
-import { addPeer, broadcastUpdateProofPool } from "./p2p";
+import { addPeer, broadcastUpdateProofPool, getPeers } from "./p2p";
 import { addProof, createProof, getProofPool, getAddress } from "./proof/node";
 import { logger } from "./logger";
 import { exportProofPool } from "./parse";
@@ -29,11 +29,15 @@ export const initAPIServer = () => {
     app.get("/getPool", (req, res) => {
         res.send(exportProofPool(getProofPool()))
     })
+    app.get("/getPeers", (req, res) => {
+        res.send(getPeers())
+    })
     app.post("/addPeer", (req, res) => {
         var url = req.body.url
         if(url != undefined){
             if(URL.canParse(url)){
                 addPeer(new URL(url))
+                res.send({"result": "success"})
             }else{
                 res.send({"result": "faild to parse"})
             }
