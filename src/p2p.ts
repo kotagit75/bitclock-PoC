@@ -23,16 +23,16 @@ const initP2PServer = () => {
     app.use(express.urlencoded({ extended: true }))
 
     peers = new Set()
-    app.get("/", (req, res) => {
+    app.get("/status", (req, res) => {
         res.send("Hello P2P!")
     })
-    app.post("/message", (req, res) => {
-        var message: Message|undefined = importMessage(req.body)
+    app.post("/", (req, res) => {
+        var message: Message|undefined = importMessage(JSON.stringify(req.body))
         if(!message){
             res.send("cannot parse request data as message")
             return
         }
-        logger.debug("P2P", "Got a message: ", message)
+        logger.debug("P2P", "Got a message: ", JSON.stringify(message))
         switch (message.type) {
             case "NONE":
                 break
