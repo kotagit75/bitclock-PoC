@@ -10,8 +10,12 @@ BitClock is a ledger-free distributed timestamp system. You can issue timestamps
 > [!NOTE]
 > BitClock is currently in active development. The API and features may change without notice.
 
+## :sparkles: Features
+- :mantelpiece_clock: Distributed timestamp without ledger - We can verify timestamp without global ledgers or blockchains.
+
 ## :books: Documents
-[About the algorithm (Not finished yet)](docs/algorithm.md)
+- [About the algorithm (Not finished yet)](docs/algorithm.md)
+
 ## :rocket: Set up
 ```bash
 # Clone the repository (or Download ZIP)
@@ -56,7 +60,8 @@ Options:
   -h, --help                       display help for command
 ```
 
-## APIs
+## :jigsaw: APIs
+
 | status | method | endpoint | feature |
 | ---- | ---- | ---- | ---- |
 | <ul><li> [x] </ul> | `GET` | /status | get status |
