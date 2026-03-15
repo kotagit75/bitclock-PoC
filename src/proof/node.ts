@@ -55,14 +55,18 @@ const fetchStamps = async (pk: string, difficulty: number): Promise<Stamp[]> => 
 }
 const createProof = async (data: string): Promise<Proof> => {
     var proofKey = new NodeRSA({ b: PROOF_KEY_SIZE })
-    const difficulty = calcDifficulty()
+    const time = Date.now()
+    const difficulty = calcDifficulty(time)
     logger.info("NODE", "Creating proof. difficulty:", difficulty)
     var stamps = await fetchStamps(keyToPk(proofKey), difficulty)
     var sk = keyToSk(proofKey)
     var stringforSign = proofToStringForSign(data, stamps, sk, getAddress())
-    return new Proof(data, stamps, sk, getAddress(), createSign(stringforSign), difficulty)
+    return new Proof(data, stamps, sk, getAddress(), createSign(stringforSign), difficulty, time)
 }
-const sortProofPool = (): Proof[] => Array.from(proofPool).sort(compareTime)
+const sortProofPool = (): Proof[] => Array.from(proofPool).sort(compareTime).reverse()
+
+// returns [the lastest, ..., the oldest]
+const sortProofPoolTimes = (): number[] => Array.from(proofPool).map((p,_,__)=>p.time).sort((a,b)=>b-a)
 const getLastestProofs = (numberOfStamps: number): Proof[] => sortProofPool().slice(0,numberOfStamps)
 const getLastestStampOfAddress = (address: Address): Stamp|undefined => {
     var lastestStamp = Array.from(proofPool).flatMap((proof, _, __) => proof.stamps).filter((stamp, _, __) => stamp.address == address).reduce((a,b)=>a.count>b.count?a:b, new Stamp("", -1, "", 0, []))
@@ -107,10 +111,38 @@ const updateProofPool = async (newProofPool: Set<Proof>) => {
     }
 }
 
-// Difficulty should be bigger.
-const calcDifficulty = (): number =>{
+function getClamped<T>(arr: T[], index: number): T|undefined {
+  return arr[Math.min(index, arr.length - 1)];
+}
+const calcActualTime = (endTime: number): number|undefined => {
+    const times = sortProofPoolTimes()
+    const lastestIndexBeforeEndTime = times.findIndex((v,_,__)=>v<endTime)
+    const startTime = getClamped(times, lastestIndexBeforeEndTime+5)
+    if(!startTime){
+        return undefined
+    }
+    return endTime - startTime
+}
+
+const calcDifficulty = (endTime: number): number =>{
     const base = 3
-    return base
+    const targetTime = 10000
+    const lastestIndexBeforeEndTime = sortProofPoolTimes().findIndex((v,_,__)=>v<endTime)
+    const oldProof = sortProofPool()[lastestIndexBeforeEndTime]
+    const actualTime = calcActualTime(endTime)
+    if(!oldProof){
+        return base
+    }
+    if(!actualTime){
+        return oldProof.difficulty
+    }
+    var rate = targetTime / actualTime
+    if(rate < 0.9){
+        rate = 0.9
+    }else if(rate > 1.1){
+        rate = 1.1
+    }
+    return rate*oldProof.difficulty
 }
 
 export { initNode, getAddress, createSign, createStamp, createProof, addProof, getProofPool, updateProofPool }
