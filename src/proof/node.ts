@@ -125,13 +125,12 @@ function getClamped<T>(arr: T[], index: number): T|undefined {
 const calcActualTime = (endTime: number): number|undefined => {
     const times = sortProofPoolTimes()
     const lastestIndexBeforeEndTime = times.findIndex((v,_,__)=>v<endTime)
-    const startTime = getClamped(times, lastestIndexBeforeEndTime+5)
+    const startTime = getClamped(times, lastestIndexBeforeEndTime+10)
     if(!startTime){
         return undefined
     }
     return endTime - startTime
 }
-
 const calcDifficulty = (endTime: number): number =>{
     const base = 3
     const targetTime = 1000*10 // targetTime should be bigger
@@ -144,11 +143,12 @@ const calcDifficulty = (endTime: number): number =>{
     if(!actualTime){
         return oldProof.difficulty
     }
-    var rate = targetTime / actualTime
-    if(rate < 0.9){
-        rate = 0.9
-    }else if(rate > 1.1){
-        rate = 1.1
+    logger.debug("NODE", "Actual time:", actualTime)
+    var rate = Math.pow(targetTime / actualTime, 1/2)
+    if(rate < 0.8){
+        rate = 0.8
+    }else if(rate > 1.2){
+        rate = 1.2
     }
     return rate*oldProof.difficulty
 }
