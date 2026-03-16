@@ -1,11 +1,12 @@
 import express from "express";
 import cors from "cors";
 import { createStamp, updateProofPool } from "./proof/node";
-import { MAX_NUMBER_OF_STAMPS, Stamp, type Proof } from "./proof/proof";
-import type { URL } from "url";
+import { MIN_NUMBER_OF_STAMPS, Stamp, type Proof } from "./proof/proof";
+import { URL } from "url";
 import { logger } from "./logger";
 import { exportMessage, exportProofPool, exportStamp, importMessage, importProofPool, importStamp } from "./parse";
 import { sleep } from "./util";
+import { addUnStampedPool } from "./stamp";
 
 var peers: Set<URL>
 
@@ -18,11 +19,14 @@ export class Message{
 const initP2PServer = () => {
     const app = express()
     const PORT = 3000
+
+    peers = new Set()
+    addPeer(new URL(`http://localhost:${PORT}/`))
+
     app.use(cors())
     app.use(express.json())
     app.use(express.urlencoded({ extended: true }))
 
-    peers = new Set()
     app.post("/", (req, res) => {
         var message: Message|undefined = importMessage(JSON.stringify(req.body))
         if(!message){
@@ -40,13 +44,8 @@ const initP2PServer = () => {
                     res.send({"result": "fail"})
                     break
                 }
-                (async () => {
-                    const stamp = createStamp(pk, difficulty)
-                    if(!stamp){
-                        return
-                    }
-                    broadcastResponceStamp(pk, exportStamp(stamp))
-                })()
+                addUnStampedPool(pk, difficulty)
+                addUnStampedPool(pk, difficulty)
                 res.send({"result": "creating"})
                 break
             case "RESPONCE_STAMP":
@@ -78,18 +77,22 @@ const initP2PServer = () => {
     })
 }
 
-const write = async (peer: URL, message: Message): Promise<string> => {
-    const responce = await fetch(peer, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(exportMessage(message))
-    })
-    return responce.text()
+const write = async (peer: URL, message: Message): Promise<string|undefined> => {
+    try {
+        const responce = await fetch(peer, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(exportMessage(message))
+        })
+        return responce.text()
+    } catch (err) {
+        return undefined
+    }
 }
-const broadcast = async (message: Message): Promise<string[]> => {
-    var responces:string[]  = []
+const broadcast = async (message: Message): Promise<(string|undefined)[]> => {
+    var responces:(string|undefined)[]  = []
     for(const peer of peers) {
         responces.push(await write(peer, message))
     }
@@ -98,7 +101,6 @@ const broadcast = async (message: Message): Promise<string[]> => {
 const broadcastRequestStamps = async (pk: string, difficulty: number): Promise<void> => {
     await broadcast(new Message("REQUEST_STAMP", pk, String(difficulty)))
 }
-const needNumberOfStamps = MAX_NUMBER_OF_STAMPS - 1
 const broadcastAndGetRequestStamps = async (pk: string, difficulty: number): Promise<Stamp[]> => {
     await broadcastRequestStamps(pk, difficulty)
     var resStamps: Stamp[]|undefined = stampPool.get(pk)
@@ -109,7 +111,7 @@ const broadcastAndGetRequestStamps = async (pk: string, difficulty: number): Pro
     const timeout = sleepTime*1000
     var waitTime = 0
     
-    while (stampsLen() < needNumberOfStamps) {
+    while (stampsLen() < MIN_NUMBER_OF_STAMPS) {
         await sleep(sleepTime);
         resStamps = stampPool.get(pk)
         waitTime+=sleepTime
@@ -137,4 +139,4 @@ const getPeers = (): URL[] => {
     return Array.from(peers)
 }
 
-export { initP2PServer, peers, broadcastRequestStamps, broadcastAndGetRequestStamps, broadcastUpdateProofPool, addPeer, getPeers }
+export { initP2PServer, peers, broadcastRequestStamps, broadcastAndGetRequestStamps, broadcastUpdateProofPool, broadcastResponceStamp, addPeer, getPeers }
