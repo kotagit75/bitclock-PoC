@@ -18,7 +18,8 @@ BitClock is a ledger-free distributed timestamp system. You can issue timestamps
 ## :books: Documents
 - [About the algorithm (Not finished yet)](docs/algorithm.md)
 
-## :rocket: Set up
+## :rocket: Getting Started
+### Installation
 ```bash
 # Clone the repository (or Download ZIP)
 git clone https://github.com/kotagit75/bitclock.git
@@ -30,7 +31,7 @@ cd bitclock
 npm install
 ```
 
-## :gear: Usage
+### Usage
 ```bash
 # run
 $ npm start
