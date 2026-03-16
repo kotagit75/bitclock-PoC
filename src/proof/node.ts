@@ -1,7 +1,7 @@
 import NodeRSA from "node-rsa";
 import fs from "fs";
 
-import { keyToPk, keyToSk, skToKey } from "@/util";
+import { keyToPk, keyToSk, median, skToKey } from "@/util";
 import { calcNonce, compareTime, isValidProof, Proof, PROOF_KEY_SIZE, proofToStringForSign, Stamp, stampToStringForSign, type Address, type Signature } from "./proof";
 import { Counter } from "./counter";
 import { broadcastAndGetRequestStamps, broadcastUpdateProofPool } from "../p2p";
@@ -90,7 +90,11 @@ const checkProofStamps = async (proof: Proof): Promise<boolean> => {
         const lastestCount = getLastestCountOfAddress(address)+1
         return findCountsByAddress(address).every((count,_,__)=>count==lastestCount)
     })
-    return isValidStampCounts
+
+    const recentTimeMedian = median(getLastestProofs(11).map((p,_,__)=>p.time))
+    const isValidTime = (!recentTimeMedian) || proof.time > recentTimeMedian
+
+    return isValidStampCounts && isValidTime
 }
 const addProof = async (proof: Proof): Promise<boolean> => {
     if (isValidProof(proof) && await checkProofStamps(proof)){
