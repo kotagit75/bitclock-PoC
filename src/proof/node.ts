@@ -1,7 +1,7 @@
 import NodeRSA from "node-rsa";
 import fs from "fs";
 
-import { isConsecutive, keyToPk, keyToSk, skToKey } from "@/util";
+import { keyToPk, keyToSk, skToKey } from "@/util";
 import { calcNonce, compareTime, isValidProof, Proof, PROOF_KEY_SIZE, proofToStringForSign, Stamp, stampToStringForSign, type Address, type Signature } from "./proof";
 import { Counter } from "./counter";
 import { broadcastAndGetRequestStamps, broadcastUpdateProofPool } from "../p2p";
