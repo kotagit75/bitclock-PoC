@@ -32,7 +32,7 @@ export const initAPIServer = () => {
     app.get("/peers", (req, res) => {
         res.send(getPeers())
     })
-    app.post("/addPeer", (req, res) => {
+    app.post("/add-peer", (req, res) => {
         var url = req.body.url
         if(url != undefined){
             if(URL.canParse(url)){
