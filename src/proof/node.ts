@@ -82,7 +82,7 @@ const getLastestCountOfAddress = (address: Address): number => {
 }
 const getLastestCountOfMine = ():number => getLastestCountOfAddress(getAddress())
 
-const checkProofStamps = async (proof: Proof): Promise<boolean> => {
+const checkProof = async (proof: Proof): Promise<boolean> => {
     const findStampsByAddress = (address: Address): Stamp[] => proof.stamps.filter((stamp, _, __) => stamp.address == address)
     const findCountsByAddress = (address: Address): number[] => findStampsByAddress(address).map((s,_,__)=>s.count)
     const addresses = Array.from(new Set(proof.stamps.map((s,_,__)=>s.address)))// Remove duplicates
@@ -97,7 +97,7 @@ const checkProofStamps = async (proof: Proof): Promise<boolean> => {
     return isValidStampCounts && isValidTime
 }
 const addProof = async (proof: Proof): Promise<boolean> => {
-    if (isValidProof(proof) && await checkProofStamps(proof)){
+    if (isValidProof(proof) && await checkProof(proof)){
         proofPool.add(proof)
         const stamp = proof.stamps[proof.stamps.map((s, _, __) => s.address).indexOf(getAddress())]
         if(stamp != undefined){
