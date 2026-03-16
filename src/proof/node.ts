@@ -112,7 +112,7 @@ const updateProofPool = async (newProofPool: Set<Proof>) => {
     for (const proof of newProofPool) {
         const isInclued = proofPool.has(proof)
         const isAddedToPool = await addProof(proof)
-        isProofAddedToSet.push(isInclued && isAddedToPool)
+        isProofAddedToSet.push(!isInclued && isAddedToPool)
     }
     if (isProofAddedToSet.includes(true) || proofPool.difference(newProofPool).size > 0) {
         broadcastUpdateProofPool(proofPool)
