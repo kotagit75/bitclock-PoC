@@ -13,13 +13,14 @@ const issueAndBroadcastStamp = (pk: string, difficulty: number, index: number) =
     broadcastResponceStamp(pk, stamp)
 }
 const initIssueStamp = () => {
-    setInterval(()=> {
+    const cycle = () => {
         const unStamped = unStampedPool.pop()
-        if(!unStamped){
-            return
+        if(unStamped){
+            issueAndBroadcastStamp(unStamped.pk, unStamped.difficulty, unStamped.index)
         }
-        issueAndBroadcastStamp(unStamped.pk, unStamped.difficulty, unStamped.index)
-    }, 100)
+        setTimeout(cycle, 10)
+    }
+    setTimeout(cycle, 10)
 }
 const addUnStampedPool = (pk: string, difficulty: number, index: number) => {
     unStampedPool.push({pk, difficulty, index})
