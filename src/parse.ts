@@ -17,7 +17,7 @@ const proofSchema = z.object({
     sk: z.string(),
     address: z.string(),
     difficulty: z.number(),
-    time: z.number()
+    time: z.number(),
     sign: z.number().array(),
 })
 const messageSchema = z.object({
