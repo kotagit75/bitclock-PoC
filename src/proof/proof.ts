@@ -29,9 +29,6 @@ class Proof{
 const sumOfCount = (stamps: Stamp[]): number => {
     return stamps.reduce((sum, k) => sum + k.count, 0)
 }
-const medianOfCount = (proof: Proof): number => {
-    return median(proof.stamps.map((s,_,__)=>s.count))
-}
 
 const PROOF_KEY_SIZE = 512
 const proofToStringForSign = (data: string, stamps: Stamp[], sk: string, address: Address): string => data+JSON.stringify(stamps)+sk+address
