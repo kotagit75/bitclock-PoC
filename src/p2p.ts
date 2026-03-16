@@ -44,8 +44,9 @@ const initP2PServer = () => {
                     res.send({"result": "fail"})
                     break
                 }
-                addUnStampedPool(pk, difficulty)
-                addUnStampedPool(pk, difficulty)
+                for (let i = 0; i < MIN_NUMBER_OF_STAMPS; i++) {
+                    addUnStampedPool(pk, difficulty, i)
+                }
                 res.send({"result": "creating"})
                 break
             case "RESPONCE_STAMP":

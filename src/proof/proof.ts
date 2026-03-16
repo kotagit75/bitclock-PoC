@@ -4,7 +4,7 @@ export type Address = string
 export type Signature = number[]
 
 class Stamp{
-    constructor(public address: Address, public count: number, public pk: string, public nonce: number, public sign: Signature){}
+    constructor(public address: Address, public count: number, public pk: string, public nonce: number, public index: number, public sign: Signature){}
 }
 const stampToStringForSign = (pk: string, address: Address, count: number, nonce: number): string => pk + address + String(count) + String(nonce)
 
@@ -35,14 +35,14 @@ const medianOfCount = (proof: Proof): number => {
 
 const PROOF_KEY_SIZE = 512
 const proofToStringForSign = (data: string, stamps: Stamp[], sk: string, address: Address): string => data+JSON.stringify(stamps)+sk+address
-const MIN_NUMBER_OF_STAMPS = 16
+const MIN_NUMBER_OF_STAMPS = 3
 const isValidProof = (proof: Proof): boolean => {
     var proof_pk = keyToPk(skToKey(proof.sk))
     const isValidStamps = proof.stamps.every((stamp, _ ,__) => isValidStamp(stamp, proof_pk, proof.difficulty))
     const isValidNumberOfStamps = proof.stamps.length >= MIN_NUMBER_OF_STAMPS
-    // const isNotDuplicatedStamps = !isDuplicated(proof.stamps.map((s,_,__)=>s.address))
+    const isNotDuplicatedStamps = !isDuplicated(proof.stamps)
     const isValidSign = pkToKey(proof.address).verify(proofToStringForSign(proof.data, proof.stamps, proof.sk, proof.address), Buffer.from(proof.sign))
-    return isValidStamps /*&& isNotDuplicatedStamps*/ && isValidNumberOfStamps && isValidSign
+    return isValidStamps && isNotDuplicatedStamps && isValidNumberOfStamps && isValidSign
 }
 const compareTime = (proof1: Proof, proof2: Proof): number => {
     return sumOfCount(proof1) - sumOfCount(proof2)

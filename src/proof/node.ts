@@ -42,11 +42,11 @@ const readNodeKey = () => {
 const getAddress = (): Address => address
 const getProofPool = (): Set<Proof> => proofPool
 const createSign = (data: string): Signature => Array.from(nodeKey.sign(data))
-const createStamp = (pk: string, difficulty: number): Stamp => {
+const createStamp = (pk: string, difficulty: number, index: number): Stamp => {
     const count = counter.getCount()+1
     const nonce = calcNonce(getAddress(), count, pk, difficulty)
     const sign = createSign(stampToStringForSign(pk, getAddress(), count, nonce))
-    return new Stamp(getAddress(), count, pk, nonce, sign)
+    return new Stamp(getAddress(), count, pk, nonce, index, sign)
 }
 const fetchStamps = async (pk: string, difficulty: number): Promise<Stamp[]> => {
     return await broadcastAndGetRequestStamps(pk, difficulty)
@@ -67,7 +67,7 @@ const sortProofPool = (): Proof[] => Array.from(proofPool).sort(compareTime).rev
 const sortProofPoolTimes = (): number[] => Array.from(proofPool).map((p,_,__)=>p.time).sort((a,b)=>b-a)
 const getLastestProofs = (numberOfStamps: number): Proof[] => sortProofPool().slice(0,numberOfStamps)
 const getLastestStampOfAddress = (address: Address): Stamp|undefined => {
-    var lastestStamp = Array.from(proofPool).flatMap((proof, _, __) => proof.stamps).filter((stamp, _, __) => stamp.address == address).reduce((a,b)=>a.count>b.count?a:b, new Stamp("", -1, "", 0, []))
+    var lastestStamp = Array.from(proofPool).flatMap((proof, _, __) => proof.stamps).filter((stamp, _, __) => stamp.address == address).reduce((a,b)=>a.count>b.count?a:b, new Stamp("", -1, "", 0, 0, []))
     if(lastestStamp.count < 0) {
         return undefined
     }
