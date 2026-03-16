@@ -40,7 +40,7 @@ const initP2PServer = () => {
             case "REQUEST_STAMP":
                 const pk = message.data
                 const difficulty: number = Number(message.data2)
-                if(!pk || !difficulty) {
+                if(!pk || difficulty == undefined) {
                     res.send({"result": "fail"})
                     break
                 }
